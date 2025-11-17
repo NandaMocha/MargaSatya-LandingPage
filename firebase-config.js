@@ -7,13 +7,13 @@ import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase
 // INSTRUKSI: Ganti dengan konfigurasi Firebase Anda
 // Dapatkan konfigurasi ini dari Firebase Console > Project Settings > Your apps
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID",
-    measurementId: "YOUR_MEASUREMENT_ID"
+  apiKey: "AIzaSyByrgwiUFxwnGhOBuogpUsN_Z1rofkc6Po",
+  authDomain: "margasatya-a8849.firebaseapp.com",
+  projectId: "margasatya-a8849",
+  storageBucket: "margasatya-a8849.firebasestorage.app",
+  messagingSenderId: "820028661198",
+  appId: "1:820028661198:web:49ee917219db50ec529f9f",
+  measurementId: "G-Z2EP6FBH4G"
 };
 
 // Initialize Firebase
