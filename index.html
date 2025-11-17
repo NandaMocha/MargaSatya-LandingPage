@@ -9,18 +9,69 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Header / Navigation -->
+    <header class="header" id="header">
+        <nav class="nav-container">
+            <div class="container nav-wrapper">
+                <!-- Logo -->
+                <a href="#" class="logo-link" id="logo">
+                    <span class="logo-text">Marga Satya</span>
+                </a>
+
+                <!-- Desktop Navigation -->
+                <div class="nav-links-wrapper">
+                    <ul class="nav-links" id="navLinks">
+                        <li><a href="#about" class="nav-link">Tentang</a></li>
+                        <li><a href="#features-teacher" class="nav-link">Fitur Guru</a></li>
+                        <li><a href="#features-student" class="nav-link">Fitur Siswa</a></li>
+                        <li><a href="#security" class="nav-link">Keamanan Ujian</a></li>
+                        <li><a href="#platform" class="nav-link">Platform</a></li>
+                        <li><a href="#schools" class="nav-link">Untuk Sekolah</a></li>
+                    </ul>
+                    <a href="#waitlist" class="nav-cta-button">Daftar Awal</a>
+                </div>
+
+                <!-- Hamburger Menu (Mobile) -->
+                <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Mobile Menu Drawer -->
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+            <div class="mobile-menu-content">
+                <ul class="mobile-nav-links">
+                    <li><a href="#about" class="mobile-nav-link">Tentang</a></li>
+                    <li><a href="#features-teacher" class="mobile-nav-link">Fitur Guru</a></li>
+                    <li><a href="#features-student" class="mobile-nav-link">Fitur Siswa</a></li>
+                    <li><a href="#security" class="mobile-nav-link">Keamanan Ujian</a></li>
+                    <li><a href="#platform" class="mobile-nav-link">Platform</a></li>
+                    <li><a href="#schools" class="mobile-nav-link">Untuk Sekolah</a></li>
+                </ul>
+                <a href="#waitlist" class="mobile-cta-button">Daftar Sekarang</a>
+            </div>
+        </div>
+    </header>
+
     <!-- Hero Section -->
-    <section class="hero">
+    <section class="hero" id="hero">
         <div class="container">
             <div class="hero-content">
                 <div class="badges">
                     <span class="badge badge-success">iOS Available</span>
                     <span class="badge badge-warning">Android Coming Soon</span>
                 </div>
-                <h1>Ujian Digital yang Aman untuk Guru & Siswa</h1>
+                <h1 class="hero-title">Ujian Digital yang Aman untuk Guru & Siswa</h1>
                 <p class="hero-subtitle">Tersedia untuk iOS. Android segera hadir.</p>
                 <p class="hero-description">Buat ujian, bagikan, dan jalankan dengan aman — termasuk untuk Google Form.</p>
-                <a href="#waitlist" class="cta-button">Daftar Sebagai Pengguna Awal</a>
+                <div class="hero-cta-group">
+                    <a href="#waitlist" class="cta-button cta-primary">Daftar Sebagai Pengguna Awal</a>
+                    <a href="#about" class="cta-button cta-secondary">Pelajari Lebih Lanjut</a>
+                </div>
             </div>
             <div class="hero-image">
                 <div class="device-mockup">
@@ -38,7 +89,7 @@
     </section>
 
     <!-- About Section -->
-    <section class="about">
+    <section class="about" id="about">
         <div class="container">
             <h2>Apa Itu Marga Satya?</h2>
             <p class="section-description">
@@ -50,7 +101,7 @@
     </section>
 
     <!-- Features for Teachers -->
-    <section class="features features-teacher">
+    <section class="features features-teacher" id="features-teacher">
         <div class="container">
             <h2>Didesain untuk Guru — Praktis, Aman, dan Fleksibel</h2>
             <div class="feature-grid">
@@ -79,7 +130,7 @@
     </section>
 
     <!-- Features for Students -->
-    <section class="features features-student">
+    <section class="features features-student" id="features-student">
         <div class="container">
             <h2>Pengalaman Ujian yang Lebih Tenang dan Fokus</h2>
             <div class="feature-grid">
@@ -108,7 +159,7 @@
     </section>
 
     <!-- Security Section -->
-    <section class="security">
+    <section class="security" id="security">
         <div class="container">
             <h2>Keamanan Ujian Berbasis Teknologi iOS</h2>
             <div class="security-content">
@@ -132,7 +183,7 @@
     </section>
 
     <!-- Platform Support -->
-    <section class="platform">
+    <section class="platform" id="platform">
         <div class="container">
             <h2>Dukung Semua Perangkat Sekolah</h2>
             <div class="platform-grid">
@@ -163,7 +214,7 @@
     </section>
 
     <!-- Schools Section -->
-    <section class="schools">
+    <section class="schools" id="schools">
         <div class="container">
             <h2>Untuk Sekolah</h2>
             <p class="section-description">
@@ -275,6 +326,9 @@
 
     <!-- Firebase SDK -->
     <script type="module" src="firebase-config.js"></script>
+    <!-- UI Interactions -->
+    <script src="interactions.js"></script>
+    <!-- Main Script -->
     <script type="module" src="script.js"></script>
 </body>
 </html>
