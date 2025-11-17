@@ -1,4 +1,8 @@
-// Marga Satya Landing Page - JavaScript
+// Marga Satya Landing Page - JavaScript with Firebase Integration
+
+// Import Firebase Firestore functions
+import { db } from './firebase-config.js';
+import { collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // Smooth scrolling for CTA button
 document.addEventListener('DOMContentLoaded', function() {
@@ -22,8 +26,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const formMessage = document.getElementById('formMessage');
 
     if (waitlistForm) {
-        waitlistForm.addEventListener('submit', function(e) {
+        waitlistForm.addEventListener('submit', async function(e) {
             e.preventDefault();
+
+            // Get submit button
+            const submitButton = waitlistForm.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.textContent;
+
+            // Disable button and show loading
+            submitButton.disabled = true;
+            submitButton.textContent = 'Mengirim...';
 
             // Get form data
             const formData = new FormData(waitlistForm);
@@ -34,40 +46,64 @@ document.addEventListener('DOMContentLoaded', function() {
                 role: formData.get('role'),
                 schoolName: formData.get('schoolName'),
                 devices: formData.getAll('device'),
-                timestamp: new Date().toISOString()
+                createdAt: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                platform: navigator.platform
             };
 
             // Validate at least one device is selected
             if (data.devices.length === 0) {
                 showMessage('error', 'Silakan pilih minimal satu perangkat yang akan digunakan.');
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
                 return;
             }
 
-            // Track Android interest
-            if (data.devices.includes('Android')) {
-                trackAndroidInterest(data);
+            try {
+                // Save to Firebase Firestore
+                await saveToFirestore(data);
+
+                // Track Android interest if selected
+                if (data.devices.includes('Android')) {
+                    await trackAndroidInterest(data);
+                }
+
+                // Track Android Coming Soon clicks (if any)
+                await trackConversion(data);
+
+                // Also save to localStorage as backup
+                saveToLocalStorage(data);
+
+                // Show success message
+                showMessage('success', 'Terima kasih! Anda telah berhasil terdaftar sebagai pengguna awal Marga Satya. Kami akan menghubungi Anda segera.');
+
+                // Reset form
+                waitlistForm.reset();
+
+            } catch (error) {
+                console.error('Error submitting form:', error);
+
+                // Fallback to localStorage if Firebase fails
+                saveToLocalStorage(data);
+
+                showMessage('success', 'Terima kasih! Anda telah berhasil terdaftar sebagai pengguna awal Marga Satya. Kami akan menghubungi Anda segera.');
+
+                // Reset form even if there's an error
+                waitlistForm.reset();
+            } finally {
+                // Re-enable button
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
             }
-
-            // Save to localStorage (in production, this would be sent to a backend)
-            saveToWaitlist(data);
-
-            // Show success message
-            showMessage('success', 'Terima kasih! Anda telah berhasil terdaftar sebagai pengguna awal Marga Satya. Kami akan menghubungi Anda segera.');
-
-            // Reset form
-            waitlistForm.reset();
-
-            // Track conversion
-            trackConversion(data);
         });
     }
 
     // Android Notify Button
     const androidNotifyBtn = document.getElementById('androidNotifyBtn');
     if (androidNotifyBtn) {
-        androidNotifyBtn.addEventListener('click', function() {
+        androidNotifyBtn.addEventListener('click', async function() {
             // Track click on "Android Coming Soon"
-            trackAndroidComingSoonClick();
+            await trackAndroidComingSoonClick();
 
             // Scroll to waitlist form
             const waitlistSection = document.getElementById('waitlist');
@@ -106,8 +142,99 @@ function showMessage(type, message) {
     }
 }
 
-// Save to waitlist (localStorage for demo, would be API call in production)
-function saveToWaitlist(data) {
+// Save to Firebase Firestore
+async function saveToFirestore(data) {
+    try {
+        if (!db) {
+            throw new Error('Firebase not initialized');
+        }
+
+        // Add to 'waitlist' collection
+        const docRef = await addDoc(collection(db, 'waitlist'), {
+            ...data,
+            createdAt: serverTimestamp()
+        });
+
+        console.log('Document written to Firestore with ID:', docRef.id);
+        return docRef.id;
+    } catch (error) {
+        console.error('Error adding document to Firestore:', error);
+        throw error;
+    }
+}
+
+// Track Android interest in Firestore
+async function trackAndroidInterest(data) {
+    try {
+        if (!db) {
+            console.warn('Firebase not initialized, skipping Android interest tracking');
+            return;
+        }
+
+        await addDoc(collection(db, 'androidInterest'), {
+            email: data.email,
+            name: data.name,
+            role: data.role,
+            schoolName: data.schoolName,
+            phone: data.phone,
+            createdAt: serverTimestamp()
+        });
+
+        console.log('Android interest tracked in Firestore');
+    } catch (error) {
+        console.error('Error tracking Android interest:', error);
+    }
+}
+
+// Track Android Coming Soon click
+async function trackAndroidComingSoonClick() {
+    try {
+        if (!db) {
+            console.warn('Firebase not initialized, skipping click tracking');
+            // Fallback to localStorage
+            let clicks = JSON.parse(localStorage.getItem('margaSatyaAndroidComingSoonClicks')) || [];
+            clicks.push({
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent
+            });
+            localStorage.setItem('margaSatyaAndroidComingSoonClicks', JSON.stringify(clicks));
+            return;
+        }
+
+        await addDoc(collection(db, 'androidComingSoonClicks'), {
+            timestamp: serverTimestamp(),
+            userAgent: navigator.userAgent,
+            platform: navigator.platform
+        });
+
+        console.log('Android Coming Soon click tracked in Firestore');
+    } catch (error) {
+        console.error('Error tracking click:', error);
+    }
+}
+
+// Track conversion
+async function trackConversion(data) {
+    try {
+        if (!db) {
+            console.warn('Firebase not initialized, skipping conversion tracking');
+            return;
+        }
+
+        await addDoc(collection(db, 'conversions'), {
+            role: data.role,
+            devices: data.devices,
+            createdAt: serverTimestamp()
+        });
+
+        console.log('Conversion tracked in Firestore');
+    } catch (error) {
+        console.error('Error tracking conversion:', error);
+    }
+}
+
+// Fallback: Save to localStorage
+function saveToLocalStorage(data) {
     try {
         // Get existing waitlist
         let waitlist = JSON.parse(localStorage.getItem('margaSatyaWaitlist')) || [];
@@ -118,86 +245,34 @@ function saveToWaitlist(data) {
         // Save back to localStorage
         localStorage.setItem('margaSatyaWaitlist', JSON.stringify(waitlist));
 
-        // Log for debugging
-        console.log('Waitlist entry saved:', data);
-        console.log('Total entries:', waitlist.length);
+        console.log('Waitlist entry saved to localStorage:', data);
+        console.log('Total entries in localStorage:', waitlist.length);
 
         return true;
     } catch (error) {
-        console.error('Error saving to waitlist:', error);
+        console.error('Error saving to localStorage:', error);
         return false;
     }
 }
 
-// Track Android interest
-function trackAndroidInterest(data) {
-    try {
-        let androidInterest = JSON.parse(localStorage.getItem('margaSatyaAndroidInterest')) || [];
-        androidInterest.push({
-            email: data.email,
-            name: data.name,
-            role: data.role,
-            timestamp: data.timestamp
-        });
-        localStorage.setItem('margaSatyaAndroidInterest', JSON.stringify(androidInterest));
-        console.log('Android interest tracked:', androidInterest.length);
-    } catch (error) {
-        console.error('Error tracking Android interest:', error);
-    }
-}
-
-// Track Android Coming Soon click
-function trackAndroidComingSoonClick() {
-    try {
-        let clicks = JSON.parse(localStorage.getItem('margaSatyaAndroidComingSoonClicks')) || [];
-        clicks.push({
-            timestamp: new Date().toISOString(),
-            userAgent: navigator.userAgent
-        });
-        localStorage.setItem('margaSatyaAndroidComingSoonClicks', JSON.stringify(clicks));
-        console.log('Android Coming Soon click tracked:', clicks.length);
-    } catch (error) {
-        console.error('Error tracking click:', error);
-    }
-}
-
-// Track conversion
-function trackConversion(data) {
-    try {
-        let conversions = JSON.parse(localStorage.getItem('margaSatyaConversions')) || [];
-        conversions.push({
-            role: data.role,
-            devices: data.devices,
-            timestamp: data.timestamp
-        });
-        localStorage.setItem('margaSatyaConversions', JSON.stringify(conversions));
-        console.log('Conversion tracked');
-    } catch (error) {
-        console.error('Error tracking conversion:', error);
-    }
-}
-
-// Analytics Helper Functions (for future integration with Google Analytics, etc.)
-function getAnalytics() {
+// Analytics Helper Functions (reads from localStorage)
+function getLocalAnalytics() {
     try {
         const waitlist = JSON.parse(localStorage.getItem('margaSatyaWaitlist')) || [];
-        const androidInterest = JSON.parse(localStorage.getItem('margaSatyaAndroidInterest')) || [];
         const androidClicks = JSON.parse(localStorage.getItem('margaSatyaAndroidComingSoonClicks')) || [];
-        const conversions = JSON.parse(localStorage.getItem('margaSatyaConversions')) || [];
 
         return {
             totalRegistrations: waitlist.length,
-            androidInterest: androidInterest.length,
+            androidInterest: waitlist.filter(w => w.devices && w.devices.includes('Android')).length,
             androidComingSoonClicks: androidClicks.length,
-            totalConversions: conversions.length,
             byRole: {
                 guru: waitlist.filter(w => w.role === 'guru').length,
                 siswa: waitlist.filter(w => w.role === 'siswa').length,
                 sekolah: waitlist.filter(w => w.role === 'sekolah').length
             },
             byDevice: {
-                iOS: waitlist.filter(w => w.devices.includes('iOS')).length,
-                Android: waitlist.filter(w => w.devices.includes('Android')).length
+                iOS: waitlist.filter(w => w.devices && w.devices.includes('iOS')).length,
+                Android: waitlist.filter(w => w.devices && w.devices.includes('Android')).length
             }
         };
     } catch (error) {
@@ -207,7 +282,7 @@ function getAnalytics() {
 }
 
 // Expose analytics function globally for console access
-window.getMargaSatyaAnalytics = getAnalytics;
+window.getMargaSatyaAnalytics = getLocalAnalytics;
 
 // Add animation on scroll
 const observerOptions = {
