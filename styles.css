@@ -1455,13 +1455,14 @@ html {
         opacity: 1;
         transform: translateY(0);
     }
+}
 
-    /* Legal pages: make sections visible by default (no JS needed) */
-    .legal-content section,
-    .legal-hero {
-        opacity: 1 !important;
-        transform: translateY(0) !important;
-    }
+/* Legal pages: make sections visible by default (no JS needed) */
+/* Placed outside media query to ensure visibility regardless of motion preferences */
+.legal-content section,
+.legal-hero {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
 }
 
 /* Enhanced Form with Focus Glow */
