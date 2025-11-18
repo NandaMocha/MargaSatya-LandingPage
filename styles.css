@@ -653,6 +653,13 @@ section h2 {
     margin-top: var(--spacing-xl);
 }
 
+.feature-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .feature-card {
     background: var(--white);
     padding: var(--spacing-xl);
@@ -1163,6 +1170,10 @@ section h2 {
     .platform-grid {
         grid-template-columns: 1fr;
     }
+
+    .feature-grid-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 768px) {
@@ -1208,7 +1219,8 @@ section h2 {
         font-size: 50px;
     }
 
-    .feature-grid {
+    .feature-grid,
+    .feature-grid-3 {
         grid-template-columns: 1fr;
     }
 
